@@ -66,8 +66,8 @@ class SecurityTest {
         var status = result.getStatus();
         var body = Objects.requireNonNull(result.getResponseBody());
         assertThat(status).isEqualTo(HttpStatus.OK);
-        assertThat(body.userId()).isEqualTo(userId);
-        assertThat(body.token()).isEqualTo(token);
+        assertThat(body.getUserId()).isEqualTo(userId);
+        assertThat(body.getToken()).isEqualTo(token);
     }
 
     @TestConfiguration
