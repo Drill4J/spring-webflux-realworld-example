@@ -77,10 +77,10 @@ class ArticleApiTest {
 
         var findArticlesRequest1 = new FindArticlesRequest()
                 .setTag(expectedTag)
-                .setAuthor(preparation.users.get(0).getUsername());
+                .setAuthor(preparation.getUsers().get(0).getUsername());
         var findArticlesRequest2 = new FindArticlesRequest()
                 .setTag(expectedTag)
-                .setAuthor(preparation.users.get(1).getUsername());
+                .setAuthor(preparation.getUsers().get(1).getUsername());
 
         var articles1 = articleApi.findArticles(findArticlesRequest1).getResponseBody();
         var articles2 = articleApi.findArticles(findArticlesRequest2).getResponseBody();
@@ -96,11 +96,11 @@ class ArticleApiTest {
         assertThat(article1)
                 .usingRecursiveComparison()
                 .ignoringFieldsOfTypes(Instant.class)
-                .isEqualTo(preparation.articles.get(0));
+                .isEqualTo(preparation.getArticles().get(0));
         assertThat(article2)
                 .usingRecursiveComparison()
                 .ignoringFieldsOfTypes(Instant.class)
-                .isEqualTo(preparation.articles.get(1));
+                .isEqualTo(preparation.getArticles().get(1));
     }
 
     @Test
@@ -288,6 +288,5 @@ class ArticleApiTest {
         assertThat(result.getTagList()).isEqualTo(createArticleRequest.getTagList());
     }
 
-    record ArticlesAndUsers(List<ArticleView> articles, List<UserView> users) {
-    }
+
 }

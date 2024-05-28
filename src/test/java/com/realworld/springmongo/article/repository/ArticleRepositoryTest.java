@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,6 +31,34 @@ class ArticleRepositoryTest {
         articleRepository.deleteAll().block();
     }
 
+    private List<Article> createArticles(int size) {
+        return createArticles(size, ArticleConfigurer.empty);
+    }
+
+    private List<Article> createArticles(int size, ArticleConfigurer articleConfigurer) {
+        var articles = IntStream.range(0, size)
+                .mapToObj(i -> {
+                    var time = Instant.now().plus(i, ChronoUnit.SECONDS);
+                    var article = ArticleSamples.sampleArticle()
+                            .createdAt(time)
+                            .updatedAt(time)
+                            .id(String.valueOf(i));
+                    articleConfigurer.configure(article, i);
+                    return article.build();
+                })
+                .collect(Collectors.toList());
+
+        articleRepository.saveAll(articles).blockLast();
+        return articles;
+    }
+
+    @FunctionalInterface
+    interface ArticleConfigurer {
+        ArticleConfigurer empty = (a, i) -> {
+        };
+
+        void configure(Article.ArticleBuilder article, int i);
+    }
 
     @Nested
     class FindMostRecentArticlesByAuthorIds {
@@ -39,7 +68,7 @@ class ArticleRepositoryTest {
             var expected = createArticles(10, (article, i) -> article.authorId(String.valueOf(i))).stream()
                     .filter(article -> authorIds.contains(article.getAuthorId()))
                     .sorted(mostRecent)
-                    .toList();
+                    .collect(Collectors.toList());
             var actual = articleRepository.findNewestArticlesByAuthorIds(authorIds, 0, 20).collectList().block();
             assertThat(actual).isEqualTo(expected);
         }
@@ -54,8 +83,9 @@ class ArticleRepositoryTest {
                     .sorted(mostRecent)
                     .skip(offset)
                     .limit(limit)
-                    .toList();
-            var actual = articleRepository.findNewestArticlesByAuthorIds(authorIds, offset, limit).collectList().block();
+                    .collect(Collectors.toList());
+            var actual =
+                    articleRepository.findNewestArticlesByAuthorIds(authorIds, offset, limit).collectList().block();
             assertThat(actual).isEqualTo(expected);
         }
     }
@@ -68,7 +98,7 @@ class ArticleRepositoryTest {
             var expected = createArticles(10).stream()
                     .sorted(mostRecent)
                     .limit(size)
-                    .toList();
+                    .collect(Collectors.toList());
 
             var actual = articleRepository.findNewestArticlesFilteredBy(null, null, null, size, 0)
                     .collectList()
@@ -86,7 +116,7 @@ class ArticleRepositoryTest {
                     .sorted(mostRecent)
                     .skip(offset)
                     .limit(5)
-                    .toList();
+                    .collect(Collectors.toList());
 
             var actual = articleRepository.findNewestArticlesFilteredBy(null, null, null, size, offset)
                     .collectList()
@@ -109,7 +139,7 @@ class ArticleRepositoryTest {
                     .filter(article -> article.hasTag(expectedTag))
                     .sorted(mostRecent)
                     .skip(offset)
-                    .toList();
+                    .collect(Collectors.toList());
 
             var actual = articleRepository.findNewestArticlesFilteredBy(expectedTag, null, null, 0, offset)
                     .collectList()
@@ -132,7 +162,8 @@ class ArticleRepositoryTest {
                     .filter(article -> article.isAuthor(expectedAuthor))
                     .sorted(mostRecent)
                     .limit(limit)
-                    .toList();
+                    .collect(Collectors.toList());
+
 
             var actual = articleRepository.findNewestArticlesFilteredBy(null, expectedAuthor, null, limit, 0)
                     .collectList()
@@ -151,7 +182,7 @@ class ArticleRepositoryTest {
                     .filter(user::isFavoriteArticle)
                     .sorted(mostRecent)
                     .limit(limit)
-                    .toList();
+                    .collect(Collectors.toList());
 
             var actual = articleRepository.findNewestArticlesFilteredBy(null, null, user, limit, 0)
                     .collectList()
@@ -186,7 +217,7 @@ class ArticleRepositoryTest {
                     })
                     .sorted(mostRecent)
                     .limit(limit)
-                    .toList();
+                    .collect(Collectors.toList());
 
             var actual = articleRepository.findNewestArticlesFilteredBy(expectedTag, expectedAuthor, user, limit, 0)
                     .collectList()
@@ -195,34 +226,5 @@ class ArticleRepositoryTest {
             assert actual != null;
             assertThat(actual).isEqualTo(expected);
         }
-    }
-
-    private List<Article> createArticles(int size) {
-        return createArticles(size, ArticleConfigurer.empty);
-    }
-
-    private List<Article> createArticles(int size, ArticleConfigurer articleConfigurer) {
-        var articles = IntStream.range(0, size)
-                .mapToObj(i -> {
-                    var time = Instant.now().plus(i, ChronoUnit.SECONDS);
-                    var article = ArticleSamples.sampleArticle()
-                            .createdAt(time)
-                            .updatedAt(time)
-                            .id(String.valueOf(i));
-                    articleConfigurer.configure(article, i);
-                    return article.build();
-                })
-                .toList();
-        articleRepository.saveAll(articles).blockLast();
-        return articles;
-    }
-
-
-    @FunctionalInterface
-    interface ArticleConfigurer {
-        ArticleConfigurer empty = (a, i) -> {
-        };
-
-        void configure(Article.ArticleBuilder article, int i);
     }
 }
