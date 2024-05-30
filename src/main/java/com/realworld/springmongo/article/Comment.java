@@ -1,8 +1,12 @@
 package com.realworld.springmongo.article;
 
 import com.realworld.springmongo.user.User;
-import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -12,12 +16,13 @@ import static java.util.Optional.ofNullable;
 
 @ToString
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@NoArgsConstructor
 public class Comment {
 
     @Id
     @EqualsAndHashCode.Include
     @Getter
-    private final String id;
+    private String id;
 
     @Getter
     @Setter
@@ -28,11 +33,11 @@ public class Comment {
     private String authorId;
 
     @Getter
-    private final Instant createdAt;
+    private Instant createdAt;
 
     @Getter
     @LastModifiedDate
-    private final Instant updatedAt;
+    private Instant updatedAt;
 
     @Builder
     public Comment(String id, String body, String authorId, Instant createdAt, Instant updatedAt) {

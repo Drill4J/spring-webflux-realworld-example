@@ -67,14 +67,14 @@ public class ArticleApiSupport {
                 .returnResult();
     }
 
-    public ArticleView getArticle(String slug, String authToken) {
+    public ArticleViewWrapper getArticle(String slug, String authToken) {
         var result = client.get()
                 .uri("/api/articles/" + slug)
                 .header(HttpHeaders.AUTHORIZATION, TokenHelper.formatToken(authToken))
                 .exchange()
                 .expectBody(ArticleViewWrapper.class)
                 .returnResult();
-        return result.getResponseBody().getContent();
+        return result.getResponseBody();
     }
 
     public EntityExchangeResult<MultipleArticlesView> findArticles(FindArticlesRequest request) {

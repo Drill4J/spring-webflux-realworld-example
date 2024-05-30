@@ -1,68 +1,39 @@
 package com.realworld.springmongo.api;
 
-import com.realworld.springmongo.user.UserRepository;
-import com.realworld.springmongo.user.dto.UpdateUserRequest;
-import com.realworld.springmongo.user.dto.UserRegistrationRequest;
-import com.realworld.springmongo.user.dto.UserView;
 import helpers.user.UserApiSupport;
 import helpers.user.UserSamples;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class UserApiTest {
-
-    @Autowired
-    WebTestClient client;
-
-    @Autowired
-    UserRepository userRepository;
-
-    UserApiSupport api;
-
-    @BeforeEach
-    void setUp() {
-        api = new UserApiSupport(client);
-        userRepository.deleteAll().block();
-    }
+    private final static String baseUrl =
+            System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+    private final WebTestClient client = WebTestClient.bindToServer().baseUrl(baseUrl).build();
+    private final UserApiSupport api = new UserApiSupport(client);
 
     @Test
     void shouldSignupUser() {
-        var userRegistrationRequest = UserSamples.sampleUserRegistrationRequest();
+        var userRegistrationRequest = UserSamples.sampleUserRegistrationRequest()
+                .setUsername("should-singup-user")
+                .setEmail("should@signup.user");
+        var signedUser = api.signup(userRegistrationRequest);
 
-        var result = api.signup(userRegistrationRequest);
-        var body = requireNonNull(result);
-
-        assertThatSignupResponseIsValid(userRegistrationRequest, body);
-    }
-
-    private void assertThatSignupResponseIsValid(UserRegistrationRequest userRegistrationRequest, UserView body) {
-        assertThat(body.getUsername()).isEqualTo(userRegistrationRequest.getUsername());
-        assertThat(body.getEmail()).isEqualTo(userRegistrationRequest.getEmail());
-        assertThat(body.getBio()).isNull();
-        assertThat(body.getImage()).isNull();
-        assertThat(body.getToken()).isNotEmpty();
+        assertThat(signedUser.getUsername()).isEqualTo(userRegistrationRequest.getUsername());
+        assertThat(signedUser.getEmail()).isEqualTo(userRegistrationRequest.getEmail());
+        assertThat(signedUser.getBio()).isNull();
+        assertThat(signedUser.getImage()).isNull();
+        assertThat(signedUser.getToken()).isNotEmpty();
     }
 
     @Test
     void shouldLoginRegisteredUser() {
         var userRegistrationRequest = UserSamples.sampleUserRegistrationRequest();
-        api.signup(userRegistrationRequest);
-
-        var userAuthenticationRequest = UserSamples.sampleUserAuthenticationRequest();
-        var result = api.login(userAuthenticationRequest);
+        var result = api.login(UserSamples.sampleUserAuthenticationRequest());
 
         requireNonNull(result);
-        assertThatLoginResponseIsValid(userRegistrationRequest, result);
-    }
-
-    private void assertThatLoginResponseIsValid(UserRegistrationRequest userRegistrationRequest, UserView result) {
         assertThat(result.getUsername()).isEqualTo(userRegistrationRequest.getUsername());
         assertThat(result.getEmail()).isEqualTo(userRegistrationRequest.getEmail());
         assertThat(result.getBio()).isNull();
@@ -72,137 +43,98 @@ class UserApiTest {
 
     @Test
     void shouldGetCurrentUser() {
-        var response = api.signup(UserSamples.sampleUserRegistrationRequest());
-        requireNonNull(response);
+        var signedUser = api.signup();
 
-        var body = api.currentUser(response.getToken());
+        var currentUser = api.currentUser(signedUser.getToken());
 
-        requireNonNull(body);
-        assertThat(body.getUsername()).isEqualTo(response.getUsername());
-        assertThat(body.getEmail()).isEqualTo(response.getEmail());
+        requireNonNull(currentUser);
+        assertThat(currentUser.getUsername()).isEqualTo(signedUser.getUsername());
+        assertThat(currentUser.getEmail()).isEqualTo(signedUser.getEmail());
     }
 
     @Test
     void shouldUpdateUser() {
-        var responseBody = api.signup(UserSamples.sampleUserRegistrationRequest());
-        requireNonNull(responseBody);
-
         var updateUserRequest = UserSamples.sampleUpdateUserRequest();
-        var body = api.updateUser(responseBody.getToken(), updateUserRequest);
+        var signedUser = api.signup();
 
-        requireNonNull(body);
-        assertThatUserIsSavedAfterUpdate(updateUserRequest);
-        assertThatUpdateUserResponseIsValid(updateUserRequest, body);
+        var updatedUser = api.updateUser(signedUser.getToken(), updateUserRequest);
+
+        requireNonNull(updatedUser);
+        assertThat(updatedUser.getBio()).isEqualTo(updateUserRequest.getBio());
+        assertThat(updatedUser.getImage()).isEqualTo(updateUserRequest.getImage());
+        assertThat(updatedUser.getUsername()).isEqualTo(updateUserRequest.getUsername());
+        assertThat(updatedUser.getEmail()).isEqualTo(updateUserRequest.getEmail());
     }
 
     @Test
     void shouldReturnProfileByNameWhenUnauthorizedUser() {
-        var request = UserSamples.sampleUserRegistrationRequest();
-        api.signup(request);
+        var sampleUserRequest = UserSamples.sampleUserRegistrationRequest();
+        api.signup();
 
-        var result = api.getProfile(request.getUsername());
+        var result = api.getProfile(sampleUserRequest.getUsername());
         var body = requireNonNull(result);
 
-        assertThat(body.getUsername()).isEqualTo(request.getUsername());
+        assertThat(body.getUsername()).isEqualTo(sampleUserRequest.getUsername());
         assertThat(body.isFollowing()).isFalse();
     }
 
     @Test
     void shouldFollowAndReturnRightProfile() {
-        var followerRegistrationRequest = UserSamples.sampleUserRegistrationRequest();
-        var followeeRegistrationRequest = UserSamples.sampleUserRegistrationRequest()
-                .setEmail("testemail2@gmail.com")
-                .setUsername("testname2");
-        api.signup(followeeRegistrationRequest);
-        var follower = api.signup(followerRegistrationRequest);
-        assert follower != null;
-        var followeeUsername = followeeRegistrationRequest.getUsername();
-        var followerAuthToken = follower.getToken();
-        api.follow(followeeUsername, followerAuthToken);
+        var followee = api.signup(UserSamples.sampleUserRegistrationRequest()
+                .setEmail("followeee@mail.com")
+                .setUsername("Followee"));
+        var follower = api.signup(UserSamples.sampleUserRegistrationRequest()
+                .setEmail("follower@mail.com")
+                .setUsername("Follower"));
 
-        var profileDto = api.getProfile(followeeUsername, followerAuthToken);
+        api.follow(followee.getUsername(), follower.getToken());
+        var profileDto = api.getProfile(followee.getUsername(), follower.getToken());
 
         assert profileDto != null;
-        assertThat(profileDto.getUsername()).isEqualTo(followeeUsername);
+        assertThat(profileDto.getUsername()).isEqualTo(followee.getUsername());
         assertThat(profileDto.isFollowing()).isTrue();
     }
 
     @Test
     void shouldFollowUser() {
-        var followeeRegistrationRequest = UserSamples.sampleUserRegistrationRequest();
-        var followerRegistrationRequest = UserSamples.sampleUserRegistrationRequest()
-                .setEmail("testemail2@gmail.com")
-                .setUsername("testname2");
-        api.signup(followeeRegistrationRequest);
-        var followerDto = api.signup(followerRegistrationRequest);
-        assert followerDto != null;
-        var followeeUsername = followeeRegistrationRequest.getUsername();
-        var authToken = followerDto.getToken();
+        var followeeDto = api.signup(UserSamples.sampleUserRegistrationRequest()
+                .setEmail("followeee2@mail.com")
+                .setUsername("Followee2"));
+        var followerDto = api.signup(UserSamples.sampleUserRegistrationRequest()
+                .setEmail("follower2@mail.com")
+                .setUsername("Follower2"));
 
-        var profileDto = api.follow(followeeUsername, authToken);
-
+        var profileDto = api.follow(followeeDto.getUsername(), followerDto.getToken());
         requireNonNull(profileDto);
-        assertThat(profileDto.getUsername()).isEqualTo(followeeUsername);
+
+        var follower = api.currentUser(followerDto.getToken());
+        var followee = api.currentUser(followeeDto.getToken());
+        assert follower != null;
+        assert followee != null;
+        assertThat(profileDto.getUsername()).isEqualTo(followeeDto.getUsername());
         assertThat(profileDto.isFollowing()).isTrue();
-        assertThatPersistedFollowerIsFollowed(followeeRegistrationRequest, followerRegistrationRequest);
+        assertThat(follower.getFollowingIds()).contains(followee.getId());
     }
 
     @Test
     void shouldUnfollowUser() {
-        var followeeRegistrationRequest = UserSamples.sampleUserRegistrationRequest();
-        var followerRegistrationRequest = UserSamples.sampleUserRegistrationRequest()
-                .setEmail("testemail2@gmail.com")
-                .setUsername("testname2");
-        var followerDto = prepareFollowerAndFollowee(followeeRegistrationRequest, followerRegistrationRequest);
-        var followeeUsername = followeeRegistrationRequest.getUsername();
-        var authToken = followerDto.getToken();
+        var followeeDto = api.signup(UserSamples.sampleUserRegistrationRequest()
+                .setEmail("followeee3@mail.com")
+                .setUsername("Followee3"));
+        var followerDto = api.signup(UserSamples.sampleUserRegistrationRequest()
+                .setEmail("follower3@mail.com")
+                .setUsername("Follower3"));
+        api.follow(followeeDto.getUsername(), followerDto.getToken());
 
-        var body = api.unfollow(followeeUsername, authToken);
+        var body = api.unfollow(followeeDto.getUsername(), followerDto.getToken());
 
         assert body != null;
-        assertThat(body.getUsername()).isEqualTo(followeeUsername);
+        assertThat(body.getUsername()).isEqualTo(followeeDto.getUsername());
         assertThat(body.isFollowing()).isFalse();
-        assertThatPersistedFollowerIsUnfollowed(followeeRegistrationRequest, followerRegistrationRequest);
-    }
-
-    private void assertThatPersistedFollowerIsUnfollowed(UserRegistrationRequest followeeRegistrationRequest, UserRegistrationRequest followerRegistrationRequest) {
-        var follower = userRepository.findByUsername(followerRegistrationRequest.getUsername()).block();
-        var followee = userRepository.findByUsername(followeeRegistrationRequest.getUsername()).block();
+        var follower = api.currentUser(followerDto.getToken());
+        var followee = api.currentUser(followeeDto.getToken());
         assert follower != null;
         assert followee != null;
         assertThat(follower.getFollowingIds()).doesNotContain(followee.getId());
-    }
-
-    private UserView prepareFollowerAndFollowee(UserRegistrationRequest followeeRegistrationRequest, UserRegistrationRequest followerRegistrationRequest) {
-        api.signup(followeeRegistrationRequest);
-        var followerDto = api.signup(followerRegistrationRequest);
-        assert followerDto != null;
-        var followeeUsername1 = followeeRegistrationRequest.getUsername();
-        var authToken1 = followerDto.getToken();
-        api.follow(followeeUsername1, authToken1);
-        return followerDto;
-    }
-
-    private void assertThatPersistedFollowerIsFollowed(UserRegistrationRequest followeeRequest, UserRegistrationRequest followerRequest) {
-        var follower = userRepository.findByUsername(followerRequest.getUsername()).block();
-        var followee = userRepository.findByUsername(followeeRequest.getUsername()).block();
-        assert follower != null;
-        assert followee != null;
-        assertThat(follower.getFollowingIds()).contains(followee.getId());
-    }
-
-    private void assertThatUserIsSavedAfterUpdate(UpdateUserRequest updateUserRequest) {
-        var user = requireNonNull(userRepository.findByEmail(updateUserRequest.getEmail()).block());
-        assertThat(user.getUsername()).isEqualTo(updateUserRequest.getUsername());
-        assertThat(user.getBio()).isEqualTo(updateUserRequest.getBio());
-        assertThat(user.getEmail()).isEqualTo(updateUserRequest.getEmail());
-        assertThat(user.getImage()).isEqualTo(updateUserRequest.getImage());
-    }
-
-    private void assertThatUpdateUserResponseIsValid(UpdateUserRequest updateUserRequest, UserView body) {
-        assertThat(body.getBio()).isEqualTo(updateUserRequest.getBio());
-        assertThat(body.getImage()).isEqualTo(updateUserRequest.getImage());
-        assertThat(body.getUsername()).isEqualTo(updateUserRequest.getUsername());
-        assertThat(body.getEmail()).isEqualTo(updateUserRequest.getEmail());
     }
 }

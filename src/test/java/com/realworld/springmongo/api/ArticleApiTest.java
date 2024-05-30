@@ -1,23 +1,17 @@
 package com.realworld.springmongo.api;
 
+import com.realworld.springmongo.api.wrappers.ArticleWrapper.ArticleViewWrapper;
 import com.realworld.springmongo.article.dto.ArticleView;
-import com.realworld.springmongo.article.dto.CreateArticleRequest;
 import com.realworld.springmongo.article.dto.CreateCommentRequest;
 import com.realworld.springmongo.article.dto.UpdateArticleRequest;
-import com.realworld.springmongo.article.repository.ArticleRepository;
-import com.realworld.springmongo.article.repository.TagRepository;
-import com.realworld.springmongo.user.UserRepository;
-import com.realworld.springmongo.user.dto.ProfileView;
 import com.realworld.springmongo.user.dto.UserView;
 import helpers.article.ArticleApiSupport;
 import helpers.article.ArticleSamples;
 import helpers.article.FindArticlesRequest;
 import helpers.user.UserApiSupport;
 import helpers.user.UserSamples;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.time.Instant;
@@ -27,53 +21,42 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ArticleApiTest {
-
-    @Autowired
-    WebTestClient client;
-
-    @Autowired
-    ArticleRepository articleRepository;
-
-    @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    TagRepository tagRepository;
-
-    UserApiSupport userApi;
-
-    ArticleApiSupport articleApi;
-
-    @BeforeEach
-    void setUp() {
-        userApi = new UserApiSupport(client);
-        articleApi = new ArticleApiSupport(client);
-        userRepository.deleteAll().block();
-        articleRepository.deleteAll().block();
-        tagRepository.deleteAll().block();
-    }
+    private final static String baseUrl =
+            System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+    private final static WebTestClient client = WebTestClient.bindToServer().baseUrl(baseUrl).build();
+    private final static UserApiSupport userApi = new UserApiSupport(client);
+    private final static UserView user = userApi.signup();
+    private final static ArticleApiSupport articleApi = new ArticleApiSupport(client);
 
     @Test
     void shouldCreateArticle() {
-        var user = userApi.signup();
-        var createArticleRequest = ArticleSamples.sampleCreateArticleRequest();
+        var createArticleRequest = ArticleSamples.sampleCreateArticleRequest()
+                .setTitle("should-create-article");
 
         var result = articleApi.createArticle(createArticleRequest, user.getToken());
         assert result != null;
         var author = result.getAuthor();
 
-        assertThatCreatedArticleIsRight(createArticleRequest, result);
-        assertThatCreatedArticleHasRightAuthor(user, author);
-        var savedArticles = articleRepository.findAll().collectList().block();
-        assertThat(savedArticles).hasSize(1);
+        //assertThatCreatedArticleIsRight
+        assertThat(result.getBody()).isEqualTo(createArticleRequest.getBody());
+        assertThat(result.getDescription()).isEqualTo(createArticleRequest.getDescription());
+        assertThat(result.getTitle()).isEqualTo(createArticleRequest.getTitle());
+        assertThat(result.getTagList()).isEqualTo(createArticleRequest.getTagList());
+        //assertThatCreatedArticleHasRightAuthor
+        assertThat(author.getUsername()).isEqualTo(user.getUsername());
+        assertThat(author.getBio()).isEqualTo(user.getBio());
+        assertThat(author.getImage()).isEqualTo(user.getImage());
+        assertThat(author.isFollowing()).isFalse();
+
+        var createdArticle = articleApi.getArticle(createArticleRequest.getTitle(), user.getToken());
+        Assertions.assertNotNull(createdArticle);
     }
 
     @Test
     void shouldFindArticles() {
         var expectedTag = "tag";
-        var preparation = create2UsersAnd3Articles(expectedTag);
+        var preparation = create2UsersAnd2Articles(expectedTag);
 
         var findArticlesRequest1 = new FindArticlesRequest()
                 .setTag(expectedTag)
@@ -106,16 +89,20 @@ class ArticleApiTest {
     @Test
     void shouldReturnFeed() {
         var follower = userApi.signup();
-        var followingUserRR = UserSamples.sampleUserRegistrationRequest()
+        var followingUser = userApi.signup(UserSamples.sampleUserRegistrationRequest()
                 .setUsername("following username")
-                .setEmail("following@gmail.com");
-        var followingUser = userApi.signup(followingUserRR);
+                .setEmail("following@gmail.com"));
         assert followingUser != null;
+
         userApi.follow(followingUser.getUsername(), follower.getToken());
-        articleApi.createArticle(ArticleSamples.sampleCreateArticleRequest(), followingUser.getToken());
-        articleApi.createArticle(ArticleSamples.sampleCreateArticleRequest(), followingUser.getToken());
-        articleApi.createArticle(ArticleSamples.sampleCreateArticleRequest(), followingUser.getToken());
-        articleApi.createArticle(ArticleSamples.sampleCreateArticleRequest(), follower.getToken());
+        articleApi.createArticle(ArticleSamples.sampleCreateArticleRequest()
+                .setTitle("should-return-feed-1"), followingUser.getToken());
+        articleApi.createArticle(ArticleSamples.sampleCreateArticleRequest()
+                .setTitle("should-return-feed-2"), followingUser.getToken());
+        articleApi.createArticle(ArticleSamples.sampleCreateArticleRequest()
+                .setTitle("should-return-feed-3"), followingUser.getToken());
+        articleApi.createArticle(ArticleSamples.sampleCreateArticleRequest()
+                .setTitle("should-return-feed-4"), follower.getToken());
 
         var resultBody = articleApi.feed(follower.getToken(), 1, 2).getResponseBody();
 
@@ -129,28 +116,27 @@ class ArticleApiTest {
 
     @Test
     void shouldReturnArticle() {
-        var user = userApi.signup();
-        var expected = articleApi.createArticle(ArticleSamples.sampleCreateArticleRequest().setTitle("article title"), user.getToken());
+        var expected = articleApi.createArticle(ArticleSamples.sampleCreateArticleRequest()
+                .setTitle("article-title"), user.getToken());
         assert expected != null;
 
         var actual = articleApi.getArticle("article-title", user.getToken());
         assert actual != null;
 
-        assertThat(actual.getSlug()).isEqualTo(expected.getSlug());
+        assertThat(actual.getContent().getSlug()).isEqualTo(expected.getSlug());
     }
 
     @Test
     void shouldUpdateArticle() {
-        var user = userApi.signup();
-        var article = articleApi.createArticle(ArticleSamples.sampleCreateArticleRequest(), user.getToken());
+        var article = articleApi.createArticle(ArticleSamples.sampleCreateArticleRequest()
+                .setTitle("should-update-article"), user.getToken());
         assert article != null;
-        var slug = article.getSlug();
         var updateArticleRequest = new UpdateArticleRequest()
                 .setBody("new body")
                 .setDescription("new description")
                 .setTitle("new title");
 
-        var updatedArticle = articleApi.updateArticle(slug, updateArticleRequest, user.getToken());
+        var updatedArticle = articleApi.updateArticle(article.getSlug(), updateArticleRequest, user.getToken());
         assert updatedArticle != null;
 
         assertThat(updatedArticle.getAuthor()).isEqualTo(article.getAuthor());
@@ -161,38 +147,37 @@ class ArticleApiTest {
 
     @Test
     void shouldDeleteArticle() {
-        var user = userApi.signup();
-        var article = articleApi.createArticle(ArticleSamples.sampleCreateArticleRequest(), user.getToken());
+        var article = articleApi.createArticle(ArticleSamples.sampleCreateArticleRequest()
+                .setTitle("should-be-deleted"), user.getToken());
         assert article != null;
-        var slug = article.getSlug();
 
-        articleApi.deleteArticle(slug, user.getToken());
+        articleApi.deleteArticle(article.getSlug(), user.getToken());
 
-        var articlesCount = articleRepository.count().block();
-        assertThat(articlesCount).isZero();
+        ArticleViewWrapper restoredArticle = articleApi.getArticle(article.getSlug(), user.getToken());
+        assertThat(restoredArticle).isNull();
     }
 
     @Test
     void shouldAddComment() {
-        var user = userApi.signup();
-        var article = articleApi.createArticle(ArticleSamples.sampleCreateArticleRequest(), user.getToken());
+        var article = articleApi.createArticle(ArticleSamples.sampleCreateArticleRequest()
+                .setTitle("should-add-comment"), user.getToken());
         assert article != null;
         var request = new CreateCommentRequest("test comment");
 
         var commentView = articleApi.addComment(article.getSlug(), request, user.getToken());
-        assert commentView != null;
 
+        assert commentView != null;
         assertThat(commentView.getBody()).isEqualTo(request.getBody());
         assertThat(commentView.getAuthor().getUsername()).isEqualTo(user.getUsername());
-        var savedArticle = articleRepository.findAll().blockFirst();
+        ArticleView savedArticle = articleApi.getArticle(article.getSlug(), user.getToken()).getContent();
         assert savedArticle != null;
         assertThat(savedArticle.getComments()).isNotEmpty();
     }
 
     @Test
     void shouldDeleteComment() {
-        var user = userApi.signup();
-        var article = articleApi.createArticle(ArticleSamples.sampleCreateArticleRequest(), user.getToken());
+        var article = articleApi.createArticle(ArticleSamples.sampleCreateArticleRequest()
+                .setTitle("should-delete-comment"), user.getToken());
         assert article != null;
         var request = new CreateCommentRequest("test comment");
         var commentView = articleApi.addComment(article.getSlug(), request, user.getToken());
@@ -200,16 +185,16 @@ class ArticleApiTest {
 
         articleApi.deleteComment(article.getSlug(), commentView.getId(), user.getToken());
 
-        var savedArticle = articleRepository.findAll().blockFirst();
+        ArticleView savedArticle = articleApi.getArticle(article.getSlug(), user.getToken()).getContent();
         assert savedArticle != null;
         assertThat(savedArticle.getComments()).isEmpty();
     }
 
     @Test
     void shouldGetComments() {
-        var user = userApi.signup();
         userApi.follow(user.getUsername(), user.getToken());
-        var article = articleApi.createArticle(ArticleSamples.sampleCreateArticleRequest(), user.getToken());
+        var article = articleApi.createArticle(ArticleSamples.sampleCreateArticleRequest()
+                .setTitle("should-get-comments"), user.getToken());
         var comment1 = articleApi.addComment(article.getSlug(), "comment 1", user.getToken());
         var comment2 = articleApi.addComment(article.getSlug(), "comment 2", user.getToken());
         var expectedComments = Set.of(comment1, comment2);
@@ -221,8 +206,8 @@ class ArticleApiTest {
 
     @Test
     void shouldFavoriteArticle() {
-        var user = userApi.signup();
-        var article = articleApi.createArticle(ArticleSamples.sampleCreateArticleRequest(), user.getToken());
+        var article = articleApi.createArticle(ArticleSamples.sampleCreateArticleRequest()
+                .setTitle("should-favorite-article"), user.getToken());
         var favoritedArticle = articleApi.favoriteArticle(article.getSlug(), user);
         assertThat(article.getFavorited()).isFalse();
         assertThat(favoritedArticle.getFavorited()).isTrue();
@@ -231,8 +216,8 @@ class ArticleApiTest {
 
     @Test
     void shouldUnfavoriteArticle() {
-        var user = userApi.signup();
-        var article = articleApi.createArticle(ArticleSamples.sampleCreateArticleRequest(), user.getToken());
+        var article = articleApi.createArticle(ArticleSamples.sampleCreateArticleRequest()
+                .setTitle("should-unfavorite-article"), user.getToken());
         var favoritedArticle = articleApi.favoriteArticle(article.getSlug(), user);
         var unfavoritedArticle = articleApi.unfavoriteArticle(article.getSlug(), user);
         assertThat(favoritedArticle.getFavorited()).isTrue();
@@ -241,52 +226,36 @@ class ArticleApiTest {
 
     @Test
     void shouldGetTags() {
-        var user = userApi.signup();
         var request1 = ArticleSamples.sampleCreateArticleRequest()
+                .setTitle("should-get-tags-1")
                 .setTagList(List.of("tag1", "tag2", "tag2"));
         var request2 = ArticleSamples.sampleCreateArticleRequest()
+                .setTitle("should-get-tags-2")
                 .setTagList(List.of("tag3", "tag4", "tag3"));
         articleApi.createArticle(request1, user.getToken());
         articleApi.createArticle(request2, user.getToken());
         var tagListView = articleApi.getTags().getResponseBody();
-        assertThat(tagListView.getTags()).isEqualTo(List.of("tag1", "tag2", "tag3", "tag4"));
+
+        assertThat(tagListView.getTags()).contains("tag1", "tag2", "tag3", "tag4");
     }
 
-    ArticlesAndUsers create2UsersAnd3Articles(String tag) {
+    private ArticlesAndUsers create2UsersAnd2Articles(String tag) {
         var user1 = userApi.signup();
-        var userRegistrationRequest = UserSamples.sampleUserRegistrationRequest()
-                .setUsername("test user 2")
-                .setEmail("testemail2@gmail.com");
-        var user2 = userApi.signup(userRegistrationRequest);
-        assert user2 != null;
+        var user2 = userApi.signup(UserSamples.sampleUserRegistrationRequest()
+                .setUsername("testarticle-user")
+                .setEmail("testarticle@gmail.com"));
 
         var createArticleRequest1 = ArticleSamples.sampleCreateArticleRequest()
+                .setTitle("should-find-articles-2")
                 .setTagList(List.of(tag));
         var createArticleRequest2 = ArticleSamples.sampleCreateArticleRequest()
+                .setTitle("should-find-articles-2")
                 .setTagList(List.of(tag));
-        var createArticleRequest3 = ArticleSamples.sampleCreateArticleRequest();
 
         var article1 = articleApi.createArticle(createArticleRequest1, user1.getToken());
         var article2 = articleApi.createArticle(createArticleRequest2, user2.getToken());
-        articleApi.createArticle(createArticleRequest3, user2.getToken());
         assert article1 != null;
         assert article2 != null;
         return new ArticlesAndUsers(List.of(article1, article2), List.of(user1, user2));
     }
-
-    private void assertThatCreatedArticleHasRightAuthor(UserView user, ProfileView author) {
-        assertThat(author.getUsername()).isEqualTo(user.getUsername());
-        assertThat(author.getBio()).isEqualTo(user.getBio());
-        assertThat(author.getImage()).isEqualTo(user.getImage());
-        assertThat(author.isFollowing()).isFalse();
-    }
-
-    private void assertThatCreatedArticleIsRight(CreateArticleRequest createArticleRequest, ArticleView result) {
-        assertThat(result.getBody()).isEqualTo(createArticleRequest.getBody());
-        assertThat(result.getDescription()).isEqualTo(createArticleRequest.getDescription());
-        assertThat(result.getTitle()).isEqualTo(createArticleRequest.getTitle());
-        assertThat(result.getTagList()).isEqualTo(createArticleRequest.getTagList());
-    }
-
-
 }
