@@ -27,6 +27,8 @@ jobs:
         uses: docker/setup-buildx-action@v3
       - name: Validate Gradle
         uses: gradle/actions/wrapper-validation@v3
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
       - name: Build app
         run: ./gradlew clean assemble
       - name: Build and export
@@ -55,5 +57,7 @@ jobs:
         run: docker-compose -f ./Docker/docker-compose.yml up
       - name: Validate Gradle
         uses: gradle/actions/wrapper-validation@v3
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
       - name: Run api tests
         run: ./gradlew runApiTests
