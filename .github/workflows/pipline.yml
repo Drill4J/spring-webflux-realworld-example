@@ -1,0 +1,55 @@
+name: Demo workflow
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - '**/src/**'
+      - '**.gradle.kts'
+      - 'gradle.properties'
+  pull_request:
+    branches:
+      - 'main'
+      - 'feature/**'
+    paths:
+      - '**/src/**'
+      - '**.gradle.kts'
+      - 'gradle.properties'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Docker Build
+        uses: docker/setup-buildx-action@v3
+      - name: Build and export
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          tags: realworld-spring-webflux:latest
+          outputs: type=docker,dest=/tmp/app.tar
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: realworld-image
+          path: /tmp/app.tar
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: realworld-image
+          path: /tmp
+      - name: Load image
+        run: docker load --input /tmp/myimage.tar
+      - name: Run docker-compose
+        run: docker-compose -f ./Docker/docker-compose.yml up
+      - name: Validate Gradle
+        uses: gradle/actions/wrapper-validation@v3
+      - name: Run api tests
+        run: ./gradlew runApiTests
