@@ -30,10 +30,6 @@ class ArticleApiTest {
     private final static UserView user = userApi.signup();
     private final static ArticleApiSupport articleApi = new ArticleApiSupport(client);
 
-    @BeforeAll
-    static void setUp() {
-        System.out.println(baseUrl);
-    }
     @Test
     void shouldCreateArticle() {
         var createArticleRequest = ArticleSamples.sampleCreateArticleRequest()

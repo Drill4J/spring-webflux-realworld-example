@@ -15,10 +15,6 @@ class UserApiTest {
     private final WebTestClient client = WebTestClient.bindToServer().baseUrl(baseUrl).build();
     private final UserApiSupport api = new UserApiSupport(client);
 
-    @BeforeAll
-    static void setUp() {
-        System.out.println(baseUrl);
-    }
 
     @Test
     void shouldSignupUser() {
