@@ -62,4 +62,4 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
       - name: Run api tests
-        run: ./gradlew runApiTests
+        run: ./gradlew --debug runApiTests
