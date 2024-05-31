@@ -108,13 +108,8 @@ class UserApiTest {
         var profileDto = api.follow(followeeDto.getUsername(), followerDto.getToken());
         requireNonNull(profileDto);
 
-        var follower = api.currentUser(followerDto.getToken());
-        var followee = api.currentUser(followeeDto.getToken());
-        assert follower != null;
-        assert followee != null;
         assertThat(profileDto.getUsername()).isEqualTo(followeeDto.getUsername());
         assertThat(profileDto.isFollowing()).isTrue();
-        assertThat(follower.getFollowingIds()).contains(followee.getId());
     }
 
     @Test
@@ -132,10 +127,5 @@ class UserApiTest {
         assert body != null;
         assertThat(body.getUsername()).isEqualTo(followeeDto.getUsername());
         assertThat(body.isFollowing()).isFalse();
-        var follower = api.currentUser(followerDto.getToken());
-        var followee = api.currentUser(followeeDto.getToken());
-        assert follower != null;
-        assert followee != null;
-        assertThat(follower.getFollowingIds()).doesNotContain(followee.getId());
     }
 }

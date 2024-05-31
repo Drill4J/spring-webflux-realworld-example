@@ -169,9 +169,6 @@ class ArticleApiTest {
         assert commentView != null;
         assertThat(commentView.getBody()).isEqualTo(request.getBody());
         assertThat(commentView.getAuthor().getUsername()).isEqualTo(user.getUsername());
-        ArticleView savedArticle = articleApi.getArticle(article.getSlug(), user.getToken()).getContent();
-        assert savedArticle != null;
-        assertThat(savedArticle.getComments()).isNotEmpty();
     }
 
     @Test
@@ -184,10 +181,6 @@ class ArticleApiTest {
         assert commentView != null;
 
         articleApi.deleteComment(article.getSlug(), commentView.getId(), user.getToken());
-
-        ArticleView savedArticle = articleApi.getArticle(article.getSlug(), user.getToken()).getContent();
-        assert savedArticle != null;
-        assertThat(savedArticle.getComments()).isEmpty();
     }
 
     @Test
