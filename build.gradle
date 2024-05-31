@@ -65,6 +65,7 @@ sourceSets {
 
 tasks.register('runApiTests', Test) {
     description = 'Runs API tests.'
+    testClassesDirs = sourceSets.apiTest.output.classesDirs
     classpath = sourceSets.apiTest.runtimeClasspath
     testLogging {
         events "passed", "skipped", "failed"
