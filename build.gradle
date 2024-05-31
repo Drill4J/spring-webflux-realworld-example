@@ -25,7 +25,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
-//	implementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo'
 
     implementation("io.jsonwebtoken:jjwt-api:0.11.2")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.2")
@@ -34,6 +33,7 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
     testImplementation 'org.springframework.security:spring-security-test'
@@ -43,12 +43,29 @@ test {
     useJUnitPlatform()
 }
 
+sourceSets {
+    main {
+        java {
+            srcDir 'main'
+        }
+    }
+    test {
+        java {
+            srcDir 'test'
+        }
+    }
+    apiTest {
+        java {
+            compileClasspath += project.configurations.testCompileClasspath + main.output + test.output
+            runtimeClasspath += project.configurations.testRuntimeClasspath + main.output + test.output
+            srcDir 'sapiTest'
+        }
+    }
+}
+
 tasks.register('runApiTests', Test) {
     description = 'Runs API tests.'
-    group = 'verification'
-    filter {
-        includeTestsMatching "com.realworld.springmongo.api.*"
-    }
+    classpath = sourceSets.apiTest.runtimeClasspath
     testLogging {
         events "passed", "skipped", "failed"
         exceptionFormat "full"

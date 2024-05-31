@@ -1,4 +1,4 @@
-package com.realworld.springmongo.api;
+package com.com.realworld.springmongo.api;
 
 import com.realworld.springmongo.api.wrappers.ArticleWrapper.ArticleViewWrapper;
 import com.realworld.springmongo.article.dto.ArticleView;
@@ -11,7 +11,6 @@ import helpers.article.FindArticlesRequest;
 import helpers.user.UserApiSupport;
 import helpers.user.UserSamples;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.reactive.server.WebTestClient;
 

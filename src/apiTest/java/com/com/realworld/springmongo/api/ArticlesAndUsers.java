@@ -1,4 +1,4 @@
-package com.realworld.springmongo.api;
+package com.com.realworld.springmongo.api;
 
 import com.realworld.springmongo.article.dto.ArticleView;
 import com.realworld.springmongo.user.dto.UserView;

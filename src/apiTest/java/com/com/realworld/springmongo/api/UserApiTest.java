@@ -1,8 +1,7 @@
-package com.realworld.springmongo.api;
+package com.com.realworld.springmongo.api;
 
 import helpers.user.UserApiSupport;
 import helpers.user.UserSamples;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
