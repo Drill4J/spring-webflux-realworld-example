@@ -17,7 +17,7 @@ on:
       - '**.gradle.kts'
       - 'gradle.properties'
 env:
-  BASE_URL: http://0.0.0.0:8091
+  BASE_URL: http://0.0.0.0:8081
 
 jobs:
   build:
