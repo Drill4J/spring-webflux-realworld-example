@@ -1,7 +1,6 @@
 package com.realworld.springmongo.article.dto;
 
 import com.realworld.springmongo.article.Article;
-import com.realworld.springmongo.article.Comment;
 import com.realworld.springmongo.user.User;
 import com.realworld.springmongo.user.dto.ProfileView;
 import lombok.AccessLevel;
@@ -18,15 +17,36 @@ import java.util.Objects;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ArticleView {
     String slug;
+
     String title;
+
     String description;
+
     String body;
+
     List<String> tagList;
-    List<Comment> comments;
+
     Instant createdAt;
+
     Instant updatedAt;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ArticleView that = (ArticleView) o;
+        return slug.equals(that.slug) && title.equals(that.title) && description.equals(that.description) && body.equals(that.body) && tagList.equals(that.tagList) && favorited.equals(that.favorited) && favoritesCount.equals(that.favoritesCount) && author.equals(that.author);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(slug, title, description, body, tagList, favorited, favoritesCount, author);
+    }
+
     Boolean favorited;
+
     Integer favoritesCount;
+
     ProfileView author;
 
     public static ArticleView toArticleView(Article article, ProfileView author, boolean favorited) {
@@ -40,8 +60,7 @@ public class ArticleView {
                 .setUpdatedAt(article.getUpdatedAt())
                 .setFavorited(favorited)
                 .setFavoritesCount(article.getFavoritesCount())
-                .setAuthor(author)
-                .setComments(article.getComments());
+                .setAuthor(author);
     }
 
     public static ArticleView ofOwnArticle(Article article, User articleOwner) {
@@ -54,24 +73,5 @@ public class ArticleView {
 
     public static ArticleView toUnfavoredArticleView(Article article, ProfileView author) {
         return toArticleView(article, author, false);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ArticleView that = (ArticleView) o;
-        return Objects.equals(slug, that.slug) && Objects.equals(title,
-                that.title) && Objects.equals(description, that.description) && Objects.equals(body,
-                that.body) && Objects.equals(tagList, that.tagList) && Objects.equals(comments,
-                that.comments) && Objects.equals(createdAt, that.createdAt) && Objects.equals(updatedAt,
-                that.updatedAt) && Objects.equals(favorited, that.favorited) && Objects.equals(
-                favoritesCount, that.favoritesCount) && Objects.equals(author, that.author);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(slug, title, description, body, tagList, comments, createdAt, updatedAt, favorited,
-                favoritesCount, author);
     }
 }
