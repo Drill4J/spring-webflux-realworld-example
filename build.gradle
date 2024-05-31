@@ -49,6 +49,11 @@ tasks.register('runApiTests', Test) {
     filter {
         includeTestsMatching "com.realworld.springmongo.api.*"
     }
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+        showStandardStreams = true
+    }
     useJUnitPlatform()
 }
 
