@@ -1,16 +1,16 @@
 version: '3'
 services:
-#  realworld-db:
-#    image: mongo:latest
-#    container_name: mongo
-#    restart: always
-#    environment:
-#      MONGO_INITDB_ROOT_USERNAME: root
-#      MONGO_INITDB_ROOT_PASSWORD: example
-#    ports:
-#      - "27017:27017"
-#    volumes:
-#      - mongo-data:/data/db
+  realworld-db:
+    image: mongo:latest
+    container_name: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
 
   realworld-api:
     image: realworld-spring-webflux:latest
@@ -22,8 +22,8 @@ services:
       - "SPRING_DATA_MONGODB_DATABASE=realworld-db"
       - "SPRING_DATA_MONGODB_USERNAME=root"
       - "SPRING_DATA_MONGODB_PASSWORD=example"
-#    depends_on:
-#      - realworld-db
+    depends_on:
+      - realworld-db
     volumes:
       - ./agent-files:/data/agent
 
