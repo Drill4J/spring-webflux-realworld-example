@@ -11,6 +11,7 @@ import helpers.article.FindArticlesRequest;
 import helpers.user.UserApiSupport;
 import helpers.user.UserSamples;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
@@ -29,6 +30,10 @@ class ArticleApiTest {
     private final static UserView user = userApi.signup();
     private final static ArticleApiSupport articleApi = new ArticleApiSupport(client);
 
+    @BeforeAll
+    static void setUp() {
+        System.out.println(baseUrl);
+    }
     @Test
     void shouldCreateArticle() {
         var createArticleRequest = ArticleSamples.sampleCreateArticleRequest()

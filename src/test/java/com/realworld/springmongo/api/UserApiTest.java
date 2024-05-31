@@ -2,6 +2,7 @@ package com.realworld.springmongo.api;
 
 import helpers.user.UserApiSupport;
 import helpers.user.UserSamples;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
@@ -13,6 +14,11 @@ class UserApiTest {
             System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
     private final WebTestClient client = WebTestClient.bindToServer().baseUrl(baseUrl).build();
     private final UserApiSupport api = new UserApiSupport(client);
+
+    @BeforeAll
+    static void setUp() {
+        System.out.println(baseUrl);
+    }
 
     @Test
     void shouldSignupUser() {
