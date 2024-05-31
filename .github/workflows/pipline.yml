@@ -63,7 +63,7 @@ jobs:
         uses: gradle/actions/wrapper-validation@v3
       - name: Make gradlew executable
         run: chmod +x ./gradlew
-      - name: Docker investigation
-        run: docker ps -a
       - name: Run api tests
         run: ./gradlew runApiTests
+      - name: Docker-compose down
+        run: docker-compose -f ./Docker/docker-compose.yml down -v
