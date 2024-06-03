@@ -18,6 +18,8 @@ on:
       - 'gradle.properties'
 env:
   BASE_URL: http://0.0.0.0:8081
+  DRILL_API_KEY: ${{ secrets.DRILL_API_KEY }}
+  DRILL_API_URL: ${{ vars.DRILL_API_URL }}
 
 jobs:
   build:
@@ -57,6 +59,10 @@ jobs:
         run: docker load --input /tmp/app.tar
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Download java-agent
+        run: curl ${{ vars.JAVA_AGENT_URL }} -o agent.zip
+      - name: Unzip java-agent
+        run: unzip agent.zip ./agent/
       - name: Run docker-compose
         run: docker-compose -f ./Docker/docker-compose.yml up -d
       - name: Validate Gradle
@@ -65,5 +71,9 @@ jobs:
         run: chmod +x ./gradlew
       - name: Run api tests
         run: ./gradlew runApiTests
+      - name: Sleep for 10 seconds
+        uses: jakejarvis/wait-action@master
+        with:
+          time: '10s'
       - name: Docker-compose down
         run: docker-compose -f ./Docker/docker-compose.yml down -v
