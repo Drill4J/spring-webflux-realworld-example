@@ -62,7 +62,7 @@ jobs:
       - name: Download java-agent
         run: curl -L ${{ vars.JAVA_AGENT_URL }} -o agent.zip
       - name: Unzip java-agent
-        run: unzip agent.zip -d agent/
+        run: unzip agent.zip -d Docker/agent/
       - name: Run docker-compose
         run: docker-compose -f ./Docker/docker-compose.yml up -d
       - name: Validate Gradle
