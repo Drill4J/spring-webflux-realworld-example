@@ -26,7 +26,7 @@ services:
     depends_on:
       - realworld-db
     volumes:
-      - ./agent:/data/agent
+      - ./agent/linuxX64-0.9.0-beta.2:/data/agent
 
 volumes:
   mongo-data:
