@@ -44,21 +44,11 @@ test {
 }
 
 sourceSets {
-    main {
-        java {
-            srcDir 'main'
-        }
-    }
-    test {
-        java {
-            srcDir 'test'
-        }
-    }
     apiTest {
         java {
             compileClasspath += project.configurations.testCompileClasspath + main.output + test.output
             runtimeClasspath += project.configurations.testRuntimeClasspath + main.output + test.output
-            srcDir 'sapiTest'
+            srcDir 'apiTest'
         }
     }
 }
@@ -67,11 +57,6 @@ tasks.register('runApiTests', Test) {
     description = 'Runs API tests.'
     testClassesDirs = sourceSets.apiTest.output.classesDirs
     classpath = sourceSets.apiTest.runtimeClasspath
-    testLogging {
-        events "passed", "skipped", "failed"
-        exceptionFormat "full"
-        showStandardStreams = true
-    }
     useJUnitPlatform()
 }
 
