@@ -3,7 +3,9 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
     id 'com.google.cloud.tools.jib' version '3.1.4'
-    id 'com.epam.drill.autotest.runner'  version '0.23.0-beta.1'
+    // TODO run autotest-agent with new version
+    id 'com.epam.drill.autotest.runner' version '0.23.0-beta.1'
+    id("com.epam.drill.integration.drill-cicd-gradle-plugin") version "0.0.1-beta.0"
 }
 
 group = 'com.realworld'
@@ -73,4 +75,15 @@ drill {
     groupId = "realworld"
     appId = "spring-webflux"
     logLevel = "TRACE"
+}
+
+drillCiCd {
+    drillApiUrl = System.getenv("DRILL_API_URL")
+    drillApiKey = System.getenv("DRILL_API_KEY")
+    groupId = "realworld"
+    appId = "spring-webflux"
+//    Cannot run two separate jobs with extra props
+//    github {
+//        token = System.getenv("DRILL_BOT_GTIHUB_TOKEN")
+//    }
 }

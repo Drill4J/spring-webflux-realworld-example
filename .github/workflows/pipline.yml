@@ -41,6 +41,8 @@ jobs:
           context: .
           tags: realworld-spring-webflux:latest
           outputs: type=docker,dest=/tmp/app.tar
+      - name: Send build info to Drill
+        run: ./gradlew drillSendBuildInfo
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
