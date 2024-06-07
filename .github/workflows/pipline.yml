@@ -79,5 +79,16 @@ jobs:
           time: '10s'
       - name: Docker-compose down
         run: docker-compose -f ./Docker/docker-compose.yml down -v
+  report:
+    if: github.event_name == 'pull_request'
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Validate Gradle
+        uses: gradle/actions/wrapper-validation@v3
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
       - name: Send coverage report from Drill
         run: ./gradlew drillGithubPullRequestReport
