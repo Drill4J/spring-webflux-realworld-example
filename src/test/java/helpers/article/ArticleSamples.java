@@ -12,7 +12,7 @@ public class ArticleSamples {
 
     public static final String DEFAULT_ARTICLE_BODY = "test article body";
     public static final String DEFAULT_ARTICLE_DESCRIPTION = "test article description";
-    public static final String DEFAULT_ARTICLE_TITLE = "test article title";
+    public static final String DEFAULT_ARTICLE_TITLE = "test-article-title";
     public static final List<String> DEFAULT_TAG_LIST = List.of("test_tag_1", "test_tag_2", "test_tag_3");
 
     public static CreateArticleRequest sampleCreateArticleRequest() {

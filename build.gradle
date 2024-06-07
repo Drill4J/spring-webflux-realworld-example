@@ -1,8 +1,10 @@
 plugins {
-	id 'org.springframework.boot' version '2.5.4'
-	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-	id 'java'
-	id 'com.google.cloud.tools.jib' version '3.1.4'
+    id 'org.springframework.boot' version '2.5.4'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+    id 'com.google.cloud.tools.jib' version '3.1.4'
+    id 'com.epam.drill.autotest.runner' version '0.23.0-beta.3'
+    id("com.epam.drill.integration.drill-cicd-gradle-plugin") version "0.0.1-beta.0"
 }
 
 group = 'com.realworld'
@@ -10,41 +12,75 @@ version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
 
 configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
-//	implementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo'
 
-	implementation("io.jsonwebtoken:jjwt-api:0.11.2")
-	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.2")
-	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.2")
+    implementation("io.jsonwebtoken:jjwt-api:0.11.2")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.2")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.2")
 
-	compileOnly 'org.projectlombok:lombok'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'io.projectreactor:reactor-test'
-	testImplementation 'org.springframework.security:spring-security-test'
+    compileOnly 'org.projectlombok:lombok'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'io.projectreactor:reactor-test'
+    testImplementation 'org.springframework.security:spring-security-test'
 }
 
 test {
-	useJUnitPlatform()
+    useJUnitPlatform()
+}
+
+sourceSets {
+    apiTest {
+        java {
+            compileClasspath += project.configurations.testCompileClasspath + main.output + test.output
+            runtimeClasspath += project.configurations.testRuntimeClasspath + main.output + test.output
+            srcDir 'apiTest'
+        }
+    }
+}
+
+tasks.register('runApiTests', Test) {
+    description = 'Runs API tests.'
+    testClassesDirs = sourceSets.apiTest.output.classesDirs
+    classpath = sourceSets.apiTest.runtimeClasspath
+    useJUnitPlatform()
 }
 
 jib {
-	to {
-		image = 'drill4j/realworld-spring-webflux'
-	}
+    to {
+        image = 'drill4j/realworld-spring-webflux'
+    }
+}
+
+drill {
+    drillApiUrl = System.getenv("DRILL_API_URL")
+    drillApiKey = System.getenv("DRILL_API_KEY")
+    groupId = "realworld"
+    appId = "spring-webflux"
+}
+
+drillCiCd {
+    drillApiUrl = System.getenv("DRILL_API_URL")
+    drillApiKey = System.getenv("DRILL_API_KEY")
+    groupId = "realworld"
+    appId = "spring-webflux"
+    github {
+        it.token = System.getenv("DRILL_BOT_GTIHUB_TOKEN")
+    }
 }

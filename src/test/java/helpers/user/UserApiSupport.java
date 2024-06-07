@@ -49,9 +49,15 @@ public class UserApiSupport {
     }
 
     public UserView signup() {
-        var user = signup(UserSamples.sampleUserRegistrationRequest());
-        assert user != null;
-        return user;
+        UserRegistrationRequest sampleUser = UserSamples.sampleUserRegistrationRequest();
+        UserView signup = signup(sampleUser);
+        if (signup == null) {
+            UserAuthenticationRequest authenticationRequest = new UserAuthenticationRequest();
+            authenticationRequest.setEmail(sampleUser.getEmail());
+            authenticationRequest.setPassword(sampleUser.getPassword());
+            signup = login(authenticationRequest);
+        }
+        return signup;
     }
 
     public UserView login(UserAuthenticationRequest userAuthenticationRequest) {
