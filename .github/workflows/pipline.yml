@@ -83,7 +83,7 @@ jobs:
         run: ./gradlew drillGithubPullRequestReport
   report:
     if: github.event_name == 'pull_request'
-    needs: build
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
