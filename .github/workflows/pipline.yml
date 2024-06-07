@@ -20,7 +20,7 @@ env:
   BASE_URL: http://0.0.0.0:8081
   DRILL_API_KEY: ${{ secrets.DRILL_API_KEY }}
   DRILL_API_URL: ${{ vars.DRILL_API_URL }}
-
+  DRILL_BOT_GITHUB_TOKEN: ${{ secrets.DRILL_BOT_GITHUB_TOKEN }}
 jobs:
   build:
     runs-on: ubuntu-latest
