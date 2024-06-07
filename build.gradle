@@ -4,7 +4,7 @@ plugins {
     id 'java'
     id 'com.google.cloud.tools.jib' version '3.1.4'
     id 'com.epam.drill.autotest.runner' version '0.23.0-beta.3'
-    id("com.epam.drill.integration.drill-cicd-gradle-plugin") version "0.0.1-beta.0"
+    id("com.epam.drill.integration.drill-cicd-gradle-plugin") version "0.0.1-beta.3"
 }
 
 group = 'com.realworld'
