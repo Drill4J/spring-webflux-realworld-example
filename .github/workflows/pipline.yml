@@ -4,9 +4,12 @@ on:
   push:
     branches:
       - 'main'
+      - 'feature/**'
   pull_request:
     branches:
       - 'feature/**'
+
+
 env:
   BASE_URL: http://0.0.0.0:8081
   DRILL_API_KEY: ${{ secrets.DRILL_API_KEY }}
