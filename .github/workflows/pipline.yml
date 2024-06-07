@@ -5,7 +5,7 @@ on:
     branches:
       - 'main'
   pull_request:
-    types: [opened, reopened]
+    types: [opened, reopened, synchronize]
 
 
 env:
@@ -78,6 +78,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_reqeust.head.sha }}
       - name: Validate Gradle
         uses: gradle/actions/wrapper-validation@v3
       - name: Make gradlew executable
