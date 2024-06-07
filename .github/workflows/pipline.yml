@@ -4,18 +4,9 @@ on:
   push:
     branches:
       - 'main'
-    paths:
-      - '**/src/**'
-      - '**.gradle.kts'
-      - 'gradle.properties'
   pull_request:
     branches:
-      - 'main'
       - 'feature/**'
-    paths:
-      - '**/src/**'
-      - '**.gradle.kts'
-      - 'gradle.properties'
 env:
   BASE_URL: http://0.0.0.0:8081
   DRILL_API_KEY: ${{ secrets.DRILL_API_KEY }}
