@@ -73,7 +73,6 @@ drill {
     drillApiKey = System.getenv("DRILL_API_KEY")
     groupId = "realworld"
     appId = "spring-webflux"
-    logLevel = "TRACE"
 }
 
 drillCiCd {
@@ -81,8 +80,7 @@ drillCiCd {
     drillApiKey = System.getenv("DRILL_API_KEY")
     groupId = "realworld"
     appId = "spring-webflux"
-//    Cannot run two separate jobs with extra props
-//    github {
-//        token = System.getenv("DRILL_BOT_GTIHUB_TOKEN")
-//    }
+    github {
+        it.token = System.getenv("DRILL_BOT_GTIHUB_TOKEN")
+    }
 }
