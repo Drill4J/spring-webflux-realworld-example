@@ -80,4 +80,4 @@ jobs:
       - name: Docker-compose down
         run: docker-compose -f ./Docker/docker-compose.yml down -v
       - name: Send coverage report from Drill
-        run: echo "impl me"
+        run: ./gradlew drillGithubPullRequestReport
