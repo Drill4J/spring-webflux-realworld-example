@@ -73,6 +73,7 @@ drill {
     drillApiKey = System.getenv("DRILL_API_KEY")
     groupId = "realworld"
     appId = "spring-webflux"
+    logLevel = "TRACE"
 }
 
 drillCiCd {
