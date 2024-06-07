@@ -81,6 +81,6 @@ drillCiCd {
     groupId = "realworld"
     appId = "spring-webflux"
     github {
-        it.token = System.getenv("DRILL_BOT_GTIHUB_TOKEN")
+        it.token = System.getenv("DRILL_BOT_GITHUB_TOKEN")
     }
 }
