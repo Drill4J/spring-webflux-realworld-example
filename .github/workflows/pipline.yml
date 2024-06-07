@@ -41,8 +41,8 @@ jobs:
           context: .
           tags: realworld-spring-webflux:latest
           outputs: type=docker,dest=/tmp/app.tar
-#      - name: Send build info to Drill
-#        run: ./gradlew drillSendBuildInfo
+      - name: Send build info to Drill
+        run: ./gradlew drillSendBuildInfo
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -79,3 +79,5 @@ jobs:
           time: '10s'
       - name: Docker-compose down
         run: docker-compose -f ./Docker/docker-compose.yml down -v
+      - name: Send coverage report from Drill
+        run: echo "impl me"
