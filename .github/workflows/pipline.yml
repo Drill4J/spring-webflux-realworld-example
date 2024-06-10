@@ -19,7 +19,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: "3ff71ff535fca058c68b86460454862c6ccf89d4"
+          ref: $GITHUB_HEAD_REF
       - name: Set up Docker Build
         uses: docker/setup-buildx-action@v3
       - name: Validate Gradle
@@ -55,7 +55,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: "3ff71ff535fca058c68b86460454862c6ccf89d4"
+          ref: $GITHUB_HEAD_REF
       - name: Download java-agent
         run: curl -L ${{ vars.JAVA_AGENT_URL }} -o agent.zip
       - name: Unzip java-agent
@@ -80,13 +80,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Print head.sha
-        run: echo ${{ github.event.pull_reqeust.head.sha }}
+        run: echo $GITHUB_HEAD_REF
       - name: Print github-event.json
         run: cat $GITHUB_EVENT_PATH
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: "3ff71ff535fca058c68b86460454862c6ccf89d4"
+          ref: $GITHUB_HEAD_REF
       - name: Validate Gradle
         uses: gradle/actions/wrapper-validation@v3
       - name: Make gradlew executable
