@@ -57,7 +57,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: $GITHUB_HEAD_REF
+          ref: ${{ github.head_ref }}
       - name: Download java-agent
         run: curl -L ${{ vars.JAVA_AGENT_URL }} -o agent.zip
       - name: Unzip java-agent
@@ -82,13 +82,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Print head.sha
-        run: echo $GITHUB_HEAD_REF
+        run: echo ${{ github.head_ref }}
       - name: Print github-event.json
         run: cat $GITHUB_EVENT_PATH
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: $GITHUB_HEAD_REF
+          ref: ${{ github.head_ref }}
       - name: Validate Gradle
         uses: gradle/actions/wrapper-validation@v3
       - name: Make gradlew executable
