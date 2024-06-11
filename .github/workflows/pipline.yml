@@ -84,6 +84,7 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
       - run: git fetch
+      - run: git merge-base HEAD main
       - name: Validate Gradle
         uses: gradle/actions/wrapper-validation@v3
       - name: Make gradlew executable
