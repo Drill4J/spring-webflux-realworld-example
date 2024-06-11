@@ -7,6 +7,7 @@ on:
   pull_request:
     types: [opened, reopened, synchronize]
 
+
 env:
   BASE_URL: http://0.0.0.0:8081
   DRILL_API_KEY: ${{ secrets.DRILL_API_KEY }}
