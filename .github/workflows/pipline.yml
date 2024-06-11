@@ -17,6 +17,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - run: echo "sha = ${{ github.event.pull_request.head.sha }}"
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -61,8 +62,11 @@ jobs:
         run: curl -L ${{ vars.JAVA_AGENT_URL }} -o agent.zip
       - name: Unzip java-agent
         run: unzip agent.zip -d Docker/agent/
+      - run: git rev-parse HEAD
       - name: Run docker-compose
         run: docker-compose -f ./Docker/docker-compose.yml up -d
+        env:
+          DRILL_COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
       - name: Validate Gradle
         uses: gradle/actions/wrapper-validation@v3
       - name: Make gradlew executable
