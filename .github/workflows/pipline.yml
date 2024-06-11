@@ -83,9 +83,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
-      - run: git fetch --prune --unshallow
+          fetch-depth: 0
       - run: git branch --track ${{ github.base_ref }} origin/${{ github.base_ref }}
-      - run: git merge-base HEAD origin/${{ github.base_ref }}
+      - run: git merge-base HEAD ${{ github.base_ref }}
       - name: Validate Gradle
         uses: gradle/actions/wrapper-validation@v3
       - name: Make gradlew executable
