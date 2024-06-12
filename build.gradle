@@ -84,5 +84,6 @@ drillCiCd {
     appId = "spring-webflux"
     github {
         it.token = System.getenv("DRILL_BOT_GITHUB_TOKEN")
+        it.fetchDepth = 100
     }
 }
