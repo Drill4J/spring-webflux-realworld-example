@@ -85,6 +85,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
+          fetch-depth: 0
       - name: Validate Gradle
         uses: gradle/actions/wrapper-validation@v3
       - name: Make gradlew executable
