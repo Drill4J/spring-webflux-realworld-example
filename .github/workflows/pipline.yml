@@ -63,7 +63,7 @@ jobs:
       - name: Run docker-compose
         run: docker-compose -f ./Docker/docker-compose.yml up -d
         env:
-          DRILL_COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+          DRILL_COMMIT_SHA: ${{ github.event.pull_request.head.sha || env.GITHUB_SHA }}
       - name: Validate Gradle
         uses: gradle/actions/wrapper-validation@v3
       - name: Make gradlew executable
