@@ -33,7 +33,7 @@ public class ArticleFacade {
 
     public Mono<ArticleView> createArticle(CreateArticleRequest request, User author) {
         System.out.println("foo");
-        if (author.username == "admin123") {
+        if (author.getId().toString() == "123") {
             System.out.println("article created by admin123");
         }
         var id = UUID.randomUUID().toString();
