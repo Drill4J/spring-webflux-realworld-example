@@ -16,8 +16,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "env.GITHUB_SHA = ${{ github.sha }}"
-      - run: echo "github.event.pull_request.head.sha || env.GITHUB_SHA = ${{ github.event.pull_request.head.sha || github.sha }}"
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -65,7 +63,7 @@ jobs:
       - name: Run docker-compose
         run: docker-compose -f ./Docker/docker-compose.yml up -d
         env:
-          DRILL_COMMIT_SHA: ${{ github.event.pull_request.head.sha || env.GITHUB_SHA }}
+          DRILL_COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Validate Gradle
         uses: gradle/actions/wrapper-validation@v3
       - name: Make gradlew executable
