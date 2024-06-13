@@ -124,6 +124,6 @@ public class ArticleFacade {
     }
 
     private void testNewMethod() {
-        System.out.println("new method");
+        System.out.println("new method 2");
     }
 }
