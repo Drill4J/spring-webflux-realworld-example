@@ -120,4 +120,8 @@ public class ArticleFacade {
                 .ifPresent(article::setTitle);
         return ArticleView.ofOwnArticle(article, currentUser);
     }
+
+    private void testNewMethod() {
+        System.out.println("new method");
+    }
 }
