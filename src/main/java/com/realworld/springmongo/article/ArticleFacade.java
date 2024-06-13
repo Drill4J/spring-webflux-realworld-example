@@ -33,6 +33,7 @@ public class ArticleFacade {
 
     public Mono<ArticleView> createArticle(CreateArticleRequest request, User author) {
         System.out.println("test-2");
+        testNewMethod();
         var id = UUID.randomUUID().toString();
         var newArticle = request.toArticle(id, author.getId());
         return articleRepository.save(newArticle)
