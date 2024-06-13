@@ -74,7 +74,7 @@ public class ArticleFacade {
                 .map(article -> updateArticle(request, currentUser, article));
     }
 
-    public Mono<Void> shareArticle() {
+    public Void shareArticle() {
         System.out.println("share article");
     }
 
