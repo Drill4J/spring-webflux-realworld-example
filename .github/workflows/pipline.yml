@@ -16,6 +16,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - run: echo "env.GITHUB_SHA = ${{ env.GITHUB_SHA }}"
+      - run: echo "github.event.pull_request.head.sha || env.GITHUB_SHA = ${{ github.event.pull_request.head.sha || env.GITHUB_SHA }}"
       - name: Checkout
         uses: actions/checkout@v4
         with:
