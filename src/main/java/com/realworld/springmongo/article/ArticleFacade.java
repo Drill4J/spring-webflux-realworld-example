@@ -87,6 +87,10 @@ public class ArticleFacade {
         return commentService.deleteComment(commentId, slug, user);
     }
 
+    public void updateComment(String commentId, User user) {
+        System.out.println("Updating comment: " + commentId);
+    }
+
     public Mono<MultipleCommentsView> getComments(String slug, Optional<User> user) {
         return commentService.getComments(slug, user);
     }
