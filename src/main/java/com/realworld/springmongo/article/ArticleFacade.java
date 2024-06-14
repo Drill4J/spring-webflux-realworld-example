@@ -32,6 +32,10 @@ public class ArticleFacade {
     }
 
     public Mono<ArticleView> createArticle(CreateArticleRequest request, User author) {
+        System.out.println("foo");
+        if (author.getId().toString() == "123") {
+            System.out.println("article created by admin123");
+        }
         var id = UUID.randomUUID().toString();
         var newArticle = request.toArticle(id, author.getId());
         return articleRepository.save(newArticle)
@@ -65,8 +69,13 @@ public class ArticleFacade {
     }
 
     public Mono<ArticleView> updateArticle(String slug, UpdateArticleRequest request, User currentUser) {
+        System.out.println("update article");
         return articleRepository.findBySlugOrFail(slug)
                 .map(article -> updateArticle(request, currentUser, article));
+    }
+
+    public void shareArticle() {
+        System.out.println("share article");
     }
 
     public Mono<Void> deleteArticle(String slug, User articleAuthor) {
