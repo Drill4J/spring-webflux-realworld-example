@@ -4,7 +4,7 @@ plugins {
     id 'java'
     id 'com.google.cloud.tools.jib' version '3.1.4'
     id 'com.epam.drill.autotest.runner' version '0.23.0-beta.4'
-    id("com.epam.drill.integration.cicd") version "0.0.1-beta.7"
+    id("com.epam.drill.integration.cicd") version "0.0.1-beta.8"
 }
 
 group = 'com.realworld'
@@ -84,5 +84,9 @@ drillCiCd {
     appId = "spring-webflux"
     github {
         it.token = System.getenv("DRILL_BOT_GITHUB_TOKEN")
+    }
+    report {
+        it.searchStrategy = "SEARCH_BY_TAG"
+        it.tagPattern = "v[0-9].[0-9].[0-9]*"
     }
 }

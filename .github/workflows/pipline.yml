@@ -92,3 +92,23 @@ jobs:
         run: chmod +x ./gradlew
       - name: Send coverage report to Drill4J
         run: ./gradlew drillGithubPullRequestReport
+  reportByTag:
+    if: github.event_name == 'push'
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Validate Gradle
+        uses: gradle/actions/wrapper-validation@v3
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+      - name: Generate Drill4J Change Testing Report
+        run: ./gradlew drillGenerateChangeTestingReport
+      - name: Archive report
+        uses: actions/upload-artifact@v4
+        with:
+          name: change-testing-report
+          path: drillReport.md
