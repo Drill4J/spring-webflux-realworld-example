@@ -84,13 +84,3 @@ drill {
         version = "0.9.*"
     }
 }
-
-drillCiCd {
-    drillApiUrl = System.getenv("DRILL_API_URL")
-    drillApiKey = System.getenv("DRILL_API_KEY")
-    groupId = "realworld"
-    appId = "spring-webflux"
-    github {
-        it.token = System.getenv("DRILL_BOT_GITHUB_TOKEN")
-    }
-}
