@@ -5,110 +5,39 @@ on:
     branches:
       - 'main'
   pull_request:
-    types: [opened, reopened, synchronize]
+    types: [ opened, reopened, synchronize ]
 
 env:
   BASE_URL: http://0.0.0.0:8081
   DRILL_API_KEY: ${{ secrets.DRILL_API_KEY }}
   DRILL_API_URL: ${{ vars.DRILL_API_URL }}
   DRILL_BOT_GITHUB_TOKEN: ${{ secrets.DRILL_BOT_GITHUB_TOKEN }}
+  DRILL_COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  SPRING_DATA_MONGODB_HOST: realworld-db
+  SPRING_DATA_MONGODB_PORT: 27017
+  SPRING_DATA_MONGODB_DATABASE: realworld-db
+  SPRING_DATA_MONGODB_USERNAME: root
+  SPRING_DATA_MONGODB_PASSWORD: example
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-14
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
-      - name: Set up Docker Build
-        uses: docker/setup-buildx-action@v3
       - name: Validate Gradle
         uses: gradle/actions/wrapper-validation@v3
       - name: Make gradlew executable
         run: chmod +x ./gradlew
       - name: Build app
         run: ./gradlew clean assemble
-      - name: Build and export
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          tags: realworld-spring-webflux:latest
-          outputs: type=docker,dest=/tmp/app.tar
-      - name: Send build info to Drill4J
-        run: ./gradlew drillSendBuildInfo
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: realworld-image
-          path: /tmp/app.tar
-  test:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: realworld-image
-          path: /tmp
-      - name: Load image
-        run: docker load --input /tmp/app.tar
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
       - name: Download java-agent
         run: curl -L ${{ vars.JAVA_AGENT_URL }} -o agent.zip
+      - run: mkdir ./agent
       - name: Unzip java-agent
-        run: unzip agent.zip -d Docker/agent/
-      - name: Run docker-compose
+        run: unzip agent.zip -d agent/
+      - name: run mongo db
         run: docker-compose -f ./Docker/docker-compose.yml up -d
-        env:
-          DRILL_COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-      - name: Validate Gradle
-        uses: gradle/actions/wrapper-validation@v3
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
-      - name: Run api tests
-        run: ./gradlew runApiTests
-      - name: Sleep for 10 seconds
-        uses: jakejarvis/wait-action@master
-        with:
-          time: '10s'
-      - name: Docker-compose down
-        run: docker-compose -f ./Docker/docker-compose.yml down -v
-  reportByPR:
-    if: github.event_name == 'pull_request'
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-          fetch-depth: 0
-      - name: Validate Gradle
-        uses: gradle/actions/wrapper-validation@v3
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
-      - name: Send coverage report to Drill4J
-        run: ./gradlew drillGithubPullRequestReport
-  reportByBranch:
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Validate Gradle
-        uses: gradle/actions/wrapper-validation@v3
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
-      - name: Generate Drill4J Change Testing Report
-        run: ./gradlew drillGenerateChangeTestingReport
-      - name: Archive report
-        uses: actions/upload-artifact@v4
-        with:
-          name: change-testing-report
-          path: drillReport.md
+      - name: run backend with java-agent
+        run: java -agentpath:/agent/macosArm64-0.9.0-beta-arm.1/libdrill_agent.dylib=drillApiUrl=${{DRILL_API_URL}},appId=spring-webflux,groupId=realworld,drillApiKey=${{DRILL_API_KEY}},packagePrefixes=com/realworld,logLevel=INFO,commitSha=${{DRILL_COMMIT_SHA}} -jar /build/libs/spring-mongo-reactive-0.0.1-SNAPSHOT.jar
