@@ -8,6 +8,7 @@ on:
     types: [ opened, reopened, synchronize ]
 
 env:
+  JAVA_HOME: JAVA_HOME_11_X64
   BASE_URL: http://0.0.0.0:8081
   DRILL_API_KEY: ${{ secrets.DRILL_API_KEY }}
   DRILL_API_URL: ${{ vars.DRILL_API_URL }}
