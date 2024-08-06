@@ -37,10 +37,11 @@ jobs:
       - name: Build app
         run: ./gradlew clean assemble
       - name: Download java-agent
-        run: curl -L ${{ vars.JAVA_AGENT_URL }} -o agent.zip
+        run: curl -L ${{ vars.JAVA_AGENT_URL }} -o ./agent.zip
       - run: mkdir ./agent
       - name: Unzip java-agent
-        run: unzip agent.zip -d agent/
+        run: unzip ./agent.zip -d ./agent/
+      - run: ls ./agent
       #      - name: run mongo db
       #        run: docker-compose -f ./Docker/docker-compose.yml up -d
       - name: run backend with java-agent
