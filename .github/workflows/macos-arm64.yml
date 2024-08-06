@@ -29,12 +29,9 @@ jobs:
       - if: runner.os == 'macos'
         run: |
           brew install docker docker-compose
-  
           # Link the Docker Compose v2 plugin so it's understood by the docker CLI
           mkdir -p ~/.docker/cli-plugins
           ln -sfn /usr/local/opt/docker-compose/bin/docker-compose ~/.docker/cli-plugins/docker-compose
-  
-          colima start
       - uses: actions/setup-java@v4
         with:
           distribution: 'corretto'
