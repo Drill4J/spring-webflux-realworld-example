@@ -39,12 +39,6 @@ jobs:
       - name: Download java-agent
         run: curl -L ${{ vars.JAVA_AGENT_URL }} -o ./agent.zip
       - run: mkdir ./agent
-      - name: Unzip java-agent
-        run: unzip ./agent.zip -d ./agent/
-      #      - name: run mongo db
-      #        run: docker-compose -f ./Docker/docker-compose.yml up -d
+      - run: unzip ./agent.zip -d ./agent/
       - name: run backend with java-agent
-        continue-on-error: true
-        run: java -agentpath:agent/macosArm64-0.9.0-beta-arm.1/libdrill_agent.dylib=drillApiUrl=$DRILL_API_URL,appId=spring-webflux,groupId=realworld,drillApiKey=$DRILL_API_KEY,packagePrefixes=com/realworld,logLevel=INFO,commitSha=$DRILL_COMMIT_SHA -jar build/libs/spring-mongo-reactive-0.0.1-SNAPSHOT.jar
-      - name: read eror file
-        run: cat /Users/runner/work/realworld-spring-webflux/realworld-spring-webflux/hs_err_pid*.log
+        run: java -agentpath:agent/macosArm64-0.9.0-beta-arm.1/libdrill_agent.dylib=drillInstallationDir=agent/macosArm64-0.9.0-beta-arm.1,drillApiUrl=$DRILL_API_URL,appId=spring-webflux,groupId=realworld,drillApiKey=$DRILL_API_KEY,packagePrefixes=com/realworld,logLevel=INFO,commitSha=$DRILL_COMMIT_SHA -jar build/libs/spring-mongo-reactive-0.0.1-SNAPSHOT.jar
