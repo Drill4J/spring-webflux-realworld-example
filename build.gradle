@@ -43,6 +43,12 @@ dependencies {
 test {
     useJUnitPlatform()
     testLogging.showStandardStreams = true
+
+    drill {
+        appAgent {
+            additionalParams = ["commitSha": System.getenv("DRILL_COMMIT_SHA")]
+        }
+    }
 }
 
 sourceSets {
