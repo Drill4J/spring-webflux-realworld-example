@@ -9,7 +9,8 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: example
     ports:
       - "27017:27017"
-    network_mode: host
+    networks:
+      - drill4j-network
 
   realworld-api:
     image: realworld-spring-webflux:latest
@@ -26,5 +27,8 @@ services:
       - realworld-db
     volumes:
       - ./agent/linuxX64-0.9.0-beta.3/:/data/agent
-    network_mode: host
+    networks:
+      - drill4j-network
 
+networks:
+  drill4j-network:
