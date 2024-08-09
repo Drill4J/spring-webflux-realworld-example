@@ -63,7 +63,7 @@ jobs:
       - name: Unzip java-agent
         run: unzip agent.zip -d Docker/agent/
       - name: Run docker-compose
-        run: docker-compose -f ./Docker/docker-compose.yml up -d
+        run: docker compose -f ./Docker/docker-compose.yml up -d
         env:
           DRILL_COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Validate Gradle
@@ -77,7 +77,7 @@ jobs:
         with:
           time: '10s'
       - name: Docker-compose down
-        run: docker-compose -f ./Docker/docker-compose.yml down -v
+        run: docker compose -f ./Docker/docker-compose.yml down -v
   reportByPR:
     if: github.event_name == 'pull_request'
     needs: test
