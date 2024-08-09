@@ -61,6 +61,24 @@ tasks.register('runApiTests', Test) {
     testClassesDirs = sourceSets.apiTest.output.classesDirs
     classpath = sourceSets.apiTest.runtimeClasspath
     useJUnitPlatform()
+
+    drill {
+        appAgent {
+            enabled = false
+        }
+    }
+
+    testLogging {
+        showStandardStreams = true
+        events "passed", "skipped", "failed", "standardOut", "standardError"
+        exceptionFormat "full"
+    }
+
+    doFirst {
+        testLogging {
+            showStandardStreams = true
+        }
+    }
 }
 
 jib {
@@ -82,6 +100,6 @@ drill {
         version = "0.23.*"
     }
     enableAppAgent {
-        version = "0.9.*"
+        version = "0.9.0-beta.*"
     }
 }
