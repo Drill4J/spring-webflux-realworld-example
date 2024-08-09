@@ -73,7 +73,7 @@ jobs:
       - name: Unzip java-agent
         run: unzip agent.zip -d Docker/agent/
       - name: Run docker-compose
-        run: docker compose -f ./Docker/docker-compose.yml up --exit-code-from api-tests
+        run: docker-compose -f ./Docker/docker-compose.yml up --exit-code-from api-tests
         env:
           DRILL_COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
   reportByPR:
