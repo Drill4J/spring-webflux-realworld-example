@@ -27,7 +27,9 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
       - name: Build app
-        run: ./gradlew clean assemble
+        run: ./gradlew clean build
+        env:
+          DRILL_COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Build and export
         uses: docker/build-push-action@v5
         with:
