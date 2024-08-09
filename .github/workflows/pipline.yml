@@ -33,7 +33,7 @@ jobs:
         with:
           file: ./Dockerfile-api-tests
           context: .
-          tags: api-tests:latest
+          tags: api-test:latest
           outputs: type=docker,dest=/tmp/api-tests.tar
       - name: Build and export backend
         uses: docker/build-push-action@v5
