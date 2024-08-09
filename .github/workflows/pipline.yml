@@ -28,27 +28,19 @@ jobs:
         run: chmod +x ./gradlew
       - name: Build app
         run: ./gradlew clean assemble
-      - name: Build and export api-test
+      - name: Build and export
         uses: docker/build-push-action@v5
         with:
-          file: ./Dockerfile-api-tests
-          context: .
-          tags: api-test:latest
-          outputs: type=docker,dest=/tmp/api-tests.tar
-      - name: Build and export backend
-        uses: docker/build-push-action@v5
-        with:
-          file: ./Dockerfile-api-backend
           context: .
           tags: realworld-spring-webflux:latest
-          outputs: type=docker,dest=/tmp/api-backend.tar
+          outputs: type=docker,dest=/tmp/app.tar
       - name: Send build info to Drill4J
         run: ./gradlew drillSendBuildInfo
-      - name: Upload artifacts
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: realworld-images
-          path: /tmp/*.tar
+          name: realworld-image
+          path: /tmp/app.tar
   test:
     needs: build
     runs-on: ubuntu-latest
@@ -56,14 +48,12 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: realworld-images
+          name: realworld-image
           path: /tmp
       - name: Set up Docker Build
         uses: docker/setup-buildx-action@v3
-      - name: Load backend image
-        run: docker load --input /tmp/api-backend.tar
-      - name: Load api-tests image
-        run: docker load --input /tmp/api-tests.tar
+      - name: Load image
+        run: docker load --input /tmp/app.tar
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -73,9 +63,21 @@ jobs:
       - name: Unzip java-agent
         run: unzip agent.zip -d Docker/agent/
       - name: Run docker-compose
-        run: docker-compose -f ./Docker/docker-compose.yml up --exit-code-from api-tests
+        run: docker compose -f ./Docker/docker-compose.yml up -d
         env:
           DRILL_COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Validate Gradle
+        uses: gradle/actions/wrapper-validation@v3
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+      - name: Run api tests
+        run: ./gradlew runApiTests
+      - name: Sleep for 10 seconds
+        uses: jakejarvis/wait-action@master
+        with:
+          time: '10s'
+      - name: Docker-compose down
+        run: docker compose -f ./Docker/docker-compose.yml down -v
   reportByPR:
     if: github.event_name == 'pull_request'
     needs: test

@@ -14,32 +14,17 @@ services:
   realworld-api:
     image: realworld-spring-webflux:latest
     ports:
-      - "8080:8080"
+      - "8081:8080"
     environment:
       - "JAVA_TOOL_OPTIONS=-agentpath:/data/agent/libdrill_agent.so=drillApiUrl=${DRILL_API_URL},appId=spring-webflux,groupId=realworld,drillApiKey=${DRILL_API_KEY},packagePrefixes=com/realworld,logLevel=INFO,commitSha=${DRILL_COMMIT_SHA}"
-      - "SPRING_DATA_MONGODB_HOST=0.0.0.0"
+      - "SPRING_DATA_MONGODB_HOST=realworld-db"
       - "SPRING_DATA_MONGODB_PORT=27017"
       - "SPRING_DATA_MONGODB_DATABASE=realworld-db"
       - "SPRING_DATA_MONGODB_USERNAME=root"
       - "SPRING_DATA_MONGODB_PASSWORD=example"
     depends_on:
       - realworld-db
-    healthcheck:
-      test: [ "CMD-SHELL", "curl --header 'Authorization: ' -f http://localhost:8080/api/healthcheck" ]
-      interval: 30s
-      timeout: 10s
-      retries: 5
     volumes:
       - ./agent/linuxX64-0.9.0-beta.3/:/data/agent
     network_mode: host
 
-  api-tests:
-    image: api-tests:latest
-    environment:
-      BASE_URL: http://0.0.0.0:8080
-      DRILL_API_URL: ${DRILL_API_URL}
-      DRILL_API_KEY: ${DRILL_API_KEY}
-    depends_on:
-      realworld-api:
-        condition: service_healthy
-    network_mode: host
