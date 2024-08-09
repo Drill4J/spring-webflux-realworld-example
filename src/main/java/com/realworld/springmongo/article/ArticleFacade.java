@@ -36,6 +36,9 @@ public class ArticleFacade {
         if (author.getId().toString() == "123") {
             System.out.println("article created by admin123");
         }
+        if (author.getId().toString() == "4321") {
+            System.out.println("article created by admin4321");
+        }
         var id = UUID.randomUUID().toString();
         var newArticle = request.toArticle(id, author.getId());
         return articleRepository.save(newArticle)
