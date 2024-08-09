@@ -73,7 +73,7 @@ drill {
     drillApiKey = System.getenv("DRILL_API_KEY")
     groupId = "realworld"
     appId = "spring-webflux"
-    packagePrefixes = ["com/realworld/springmongo"]
+    packagePrefixes = ["com/realworld"]
     github {
         it.token = System.getenv("DRILL_BOT_GITHUB_TOKEN")
     }
