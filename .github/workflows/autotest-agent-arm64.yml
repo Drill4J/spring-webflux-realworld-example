@@ -1,4 +1,4 @@
-name: Demo workflow
+name: Workflow for mac-os arm64 with autotest-agent
 on:
   workflow_dispatch:
   push:
