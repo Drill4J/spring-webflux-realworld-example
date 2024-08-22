@@ -94,7 +94,7 @@ jib {
 }
 
 drill {
-    drillApiUrl = "http://localhost:8090/api"
+    drillApiUrl = System.getenv("DRILL_API_URL")
     drillApiKey = System.getenv("DRILL_API_KEY")
     groupId = "realworld"
     appId = "spring-webflux"
