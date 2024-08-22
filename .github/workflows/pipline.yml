@@ -77,6 +77,8 @@ jobs:
         run: chmod +x ./gradlew
       - name: Run api tests
         run: ./gradlew runApiTests
+      - name: Run unit tests
+        run: ./gradlew test
       - name: Sleep for 10 seconds
         uses: jakejarvis/wait-action@master
         with:
