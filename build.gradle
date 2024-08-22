@@ -103,7 +103,7 @@ drill {
         it.token = System.getenv("DRILL_BOT_GITHUB_TOKEN")
     }
     enableTestAgent {
-        version = "0.23.*"
+        downloadUrl = System.getenv("DRILL_AUTOTEST_AGENT_URL")
     }
     enableAppAgent {
         version = "0.9.0-beta.*"

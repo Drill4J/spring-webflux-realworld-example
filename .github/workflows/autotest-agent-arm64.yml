@@ -12,6 +12,7 @@ env:
   DRILL_API_KEY: ${{ secrets.DRILL_API_KEY }}
   DRILL_API_URL: ${{ vars.DRILL_API_URL }}
   DRILL_BOT_GITHUB_TOKEN: ${{ secrets.DRILL_BOT_GITHUB_TOKEN }}
+  DRILL_AUTOTEST_AGENT_URL: ${{ vars.DRILL_AUTOTEST_AGENT_URL }}
 jobs:
   test:
     runs-on: macos-14
