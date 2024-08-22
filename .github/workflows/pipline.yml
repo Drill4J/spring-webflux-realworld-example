@@ -63,7 +63,10 @@ jobs:
       - name: Download java-agent
         run: curl -L ${{ vars.JAVA_AGENT_URL }} -o agent.zip
       - name: Unzip java-agent
-        run: unzip agent.zip -d Docker/agent/
+        run: mkdir ./temp-agent-dir && \
+          mkdir Docker/agent/ && \
+          unzip agent.zip -d ./temp-agent-dir && \
+          find temp-agent-dir -mindepth 2 -exec mv -t Docker/agent/ {} +
       - name: Run docker-compose
         run: docker compose -f ./Docker/docker-compose.yml up -d
         env:
