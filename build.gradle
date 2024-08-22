@@ -106,6 +106,6 @@ drill {
         downloadUrl = System.getenv("DRILL_AUTOTEST_AGENT_URL")
     }
     enableAppAgent {
-        version = "0.9.0-beta.*"
+        version = "0.9.0-beta.arm.1"
     }
 }
