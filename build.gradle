@@ -3,7 +3,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
     id 'com.google.cloud.tools.jib' version '3.1.4'
-    id("com.epam.drill.integration.cicd") version "0.1.0-beta.0"
+    id("com.epam.drill.integration.cicd") version "0.1.4"
 }
 
 group = 'com.realworld'
@@ -43,12 +43,6 @@ dependencies {
 test {
     useJUnitPlatform()
     testLogging.showStandardStreams = true
-
-    drill {
-        appAgent {
-            additionalParams = ["commitSha": System.getenv("DRILL_COMMIT_SHA")]
-        }
-    }
 }
 
 sourceSets {
@@ -67,12 +61,6 @@ tasks.register('runApiTests', Test) {
     testClassesDirs = sourceSets.apiTest.output.classesDirs
     classpath = sourceSets.apiTest.runtimeClasspath
     useJUnitPlatform()
-
-    drill {
-        appAgent {
-            enabled = true
-        }
-    }
 
     testLogging {
         showStandardStreams = true
@@ -94,8 +82,6 @@ jib {
 }
 
 drill {
-    drillApiUrl = System.getenv("DRILL_API_URL")
-    drillApiKey = System.getenv("DRILL_API_KEY")
     groupId = "realworld"
     appId = "spring-webflux"
     packagePrefixes = ["com/realworld"]
@@ -103,9 +89,9 @@ drill {
         it.token = System.getenv("DRILL_BOT_GITHUB_TOKEN")
     }
     enableTestAgent {
-        version="0.23.0-beta.7"
+        version = "0.23.3-arm64.1"
     }
     enableAppAgent {
-        version = "0.9.0-beta.5"
+        version = "0.9.3-arm64.1"
     }
 }
