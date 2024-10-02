@@ -89,9 +89,9 @@ drill {
         it.token = System.getenv("DRILL_BOT_GITHUB_TOKEN")
     }
     enableTestAgent {
-        version = "0.23.2"
+        version = "0.23.3-arm64.1"
     }
     enableAppAgent {
-        version = "0.9.3"
+        version = "0.9.3-arm64.1"
     }
 }

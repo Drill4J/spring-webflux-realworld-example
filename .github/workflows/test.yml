@@ -1,4 +1,4 @@
-name: Demo workflow
+name: Demo workflow unit tests
 on:
   workflow_dispatch:
   push:
@@ -8,36 +8,24 @@ on:
     types: [ opened, reopened, synchronize ]
 
 env:
-  BASE_URL: http://0.0.0.0:8081
   DRILL_API_KEY: ${{ secrets.DRILL_API_KEY }}
   DRILL_API_URL: ${{ vars.DRILL_API_URL }}
-  DRILL_BOT_GITHUB_TOKEN: ${{ secrets.DRILL_BOT_GITHUB_TOKEN }}
   DRILL_COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-  SPRING_DATA_MONGODB_HOST: realworld-db
-  SPRING_DATA_MONGODB_PORT: 27017
-  SPRING_DATA_MONGODB_DATABASE: realworld-db
-  SPRING_DATA_MONGODB_USERNAME: root
-  SPRING_DATA_MONGODB_PASSWORD: example
 jobs:
-  build:
+  test:
     runs-on: macos-14
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'corretto'
+          java-version: '11'
       - name: Validate Gradle
         uses: gradle/actions/wrapper-validation@v3
       - name: Make gradlew executable
         run: chmod +x ./gradlew
-      - name: Build app
-        run: ./gradlew clean assemble
-      - name: Download java-agent
-        run: curl -L ${{ vars.JAVA_AGENT_URL }} -o agent.zip
-      - run: mkdir ./agent
-      - name: Unzip java-agent
-        run: unzip agent.zip -d agent/
-      - name: run mongo db
-        run: docker-compose -f ./Docker/docker-compose.yml up -d
-      - name: run backend with java-agent
-        run: java -agentpath:/agent/macosArm64-0.9.0-beta-arm.1/libdrill_agent.dylib=drillApiUrl=${{DRILL_API_URL}},appId=spring-webflux,groupId=realworld,drillApiKey=${{DRILL_API_KEY}},packagePrefixes=com/realworld,logLevel=INFO,commitSha=${{DRILL_COMMIT_SHA}} -jar /build/libs/spring-mongo-reactive-0.0.1-SNAPSHOT.jar
+      - name: Run unit tests
+        run: ./gradlew test
